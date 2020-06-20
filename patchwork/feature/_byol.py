@@ -92,6 +92,12 @@ def _mse(y_true, y_pred):
     return y_true.shape[-1]*tf.reduce_mean(
         tf.keras.losses.mean_squared_error(y_true, y_pred))
 
+def _dot_product_loss(a,b):
+    a = tf.nn.l2_normalize(a, axis=1)
+    b = tf.nn.l2_normalize(b, axis=1)
+    prod = tf.matmul(a, b, transpose_b=True)
+    return 2-2*tf.reduce_mean(prod)
+
 def _build_byol_training_step(online, prediction, target, optimizer,
                               tau, weight_decay=0):
     """
@@ -115,7 +121,8 @@ def _build_byol_training_step(online, prediction, target, optimizer,
             pred1 = _norm(prediction(z1, training=True))
             pred2 = _norm(prediction(z2, training=True))
             # compute mean-squared error both ways
-            mse_loss = _mse(targ1, pred2) + _mse(targ2, pred1)
+            #mse_loss = _mse(targ1, pred2) + _mse(targ2, pred1)
+            mse_loss = _dot_product_loss(targ1, pred2) + _dot_product_loss(targ2, pred1)
             lossdict["loss"] = mse_loss
             lossdict["mse_loss"] = mse_loss
 
