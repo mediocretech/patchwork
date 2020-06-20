@@ -141,6 +141,36 @@ def _build_byol_training_step(online, prediction, target, optimizer,
     return training_step
         
         
+def _compare_model_weights(online, target):
+    """
+    Macro to build a summary stat to help us
+    understand whether the online and target models
+    are collapsing toward each other.
+    
+    Computes the average cosine similarity across
+    all corresponding model weights
+    """
+    N = len(online.trainable_variables)
+    cosine_sim = 0
+    
+    for o,t in zip(online.trainable_variables, target.trainable_variables):
+        o = tf.nn.l2_normalize(tf.reshape(o, [-1]))
+        t = tf.nn.l2_normalize(tf.reshape(t, [-1]))
+        cosine_sim += tf.reduce_sum(o*t)
+        
+    return cosine_sim/N
+
+def _average_cosine_sim(x):
+    """
+    Input a 2D tensor and return the average pairwise
+    cosine similarity of rows in the tensor.
+    """
+    x_norm = tf.nn.l2_normalize(x, 1)
+    return tf.reduce_mean(tf.matmul(x_norm, x_norm,
+                                    transpose_b=True))
+        
+
+
 
 
 class BYOLTrainer(GenericExtractor):
@@ -227,13 +257,19 @@ class BYOLTrainer(GenericExtractor):
         self._training_step = self._distribute_training_function(step_fn)
         
         if testdata is not None:
-            """
+            
             self._test_ds = _build_byol_dataset(testdata, 
                                         imshape=imshape, batch_size=batch_size,
                                         num_parallel_calls=num_parallel_calls, 
                                         norm=norm, num_channels=num_channels, 
                                         augment=augment,
                                         single_channel=single_channel)
+            @tf.function
+            def cmw():
+                return _compare_model_weights(self._models["online"], 
+                                              self._models["target"])
+            self._compare_model_weights = cmw
+            """
             
             @tf.function
             def test_loss(x,y):
@@ -281,7 +317,12 @@ class BYOLTrainer(GenericExtractor):
              
     def evaluate(self):
         if self._test:
-            pass
+            # compute average cosine similarity of target and online networks
+            self._record_scalars(online_target_cosine_similarity=self._compare_model_weights())
+            #
+            proj = self._models["online"].predict(self._test_ds)
+            acs = _average_cosine_sim(proj)
+            self._record_scalars(test_proj_avg_cosine_sim=acs)
             """
             for x,y in self._test_ds:
                 loss, sim = self._test_loss(x,y)
