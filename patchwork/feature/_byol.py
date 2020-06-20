@@ -112,8 +112,8 @@ def _build_byol_training_step(online, prediction, target, optimizer,
             z1 = online(x1, training=True)
             z2 = online(x2, training=True)
             # online predictions
-            pred1 = _norm(prediction(z1))
-            pred2 = _norm(prediction(z2))
+            pred1 = _norm(prediction(z1, training=True))
+            pred2 = _norm(prediction(z2, training=True))
             # compute mean-squared error both ways
             mse_loss = _mse(targ1, pred2) + _mse(targ2, pred1)
             lossdict["loss"] = mse_loss
