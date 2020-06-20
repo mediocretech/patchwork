@@ -10,7 +10,7 @@ import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
 
-from patchwork.feature._generic import GenericExtractor
+from patchwork.feature._generic import GenericExtractor, _GENERIC_DESCRIPTIONS
 from patchwork.feature._moco import exponential_model_update
 
 from patchwork._augment import augment_function
@@ -18,7 +18,19 @@ from patchwork.loaders import _image_file_dataset
 from patchwork._util import compute_l2_loss
 
 
-#BIG_NUMBER = 1000.
+_DESCRIPTIONS = {
+    "online_target_cosine_similarity":"""
+    Average cosine similarity between all the weights of the target network and corresponding weights of the online network. 
+    """,
+    "test_proj_avg_cosine_sim":"""
+    Average pairwise cosine similarity between projections of (augmented) images in the test set. If this converges toward1 it could mean you're getting mode collapse.'
+    """,
+    "mse_loss":"""
+    Mean-squared error between online network prediction and target network projection for the training batch
+    """}
+    
+for d in _GENERIC_DESCRIPTIONS:
+    _DESCRIPTIONS[d] = _GENERIC_DESCRIPTIONS[d]
 
 def _perceptron(input_dim, num_hidden=4096, output_dim=256, batchnorm=True):
     # macro to build a single-hidden-layer perceptron
@@ -220,6 +232,7 @@ class BYOLTrainer(GenericExtractor):
         self.trainingdata = trainingdata
         self._downstream_labels = downstream_labels
         self.strategy = strategy
+        self._descriptions = _DESCRIPTIONS
         
         self._file_writer = tf.summary.create_file_writer(logdir, flush_millis=10000)
         self._file_writer.set_as_default()

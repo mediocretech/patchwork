@@ -25,6 +25,16 @@ INPUT_PARAMS = ["imshape", "num_channels", "norm", "batch_size",
                 "global_batch_size"]
 
 
+_GENERIC_DESCRIPTIONS = {
+    "linear_classification_accuracy":"""
+    Estimate of performance of the **fully-convolutional network only** on a downstream task:
+    * downstream labels are separated into training and test sets (2/3-1/3 split)
+    * each image is run through the FCN *without augmentation* and then average-pooled to build a feature vector
+    * a multinomial regression is fit on the feature vectors an the test accuracy recorded.
+    """,
+    "l2_loss":"""
+    Squared L2-norm of every trainable weight (excluding batchnorm layers) in the network.
+    """}
 
 def linear_classification_test(fcn, downstream_labels, **input_config):
     """
@@ -238,7 +248,12 @@ class GenericExtractor(object):
             
     def _record_scalars(self, **scalars):
         for s in scalars:
-            tf.summary.scalar(s, scalars[s], step=self.step)
+            if hasattr(self, "_descriptions") and (s in self._descriptions):
+                desc = self._descriptions[s]
+            else:
+                desc = None
+            tf.summary.scalar(s, scalars[s], step=self.step,
+                              description=desc)
             
     def _record_images(self, **images):
         for i in images:
