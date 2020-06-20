@@ -89,7 +89,7 @@ def _norm(x):
 
 def _mse(y_true, y_pred):
     # mean-squared error loss wrapper
-    return tf.reduce_mean(
+    return y_true.shape[-1]*tf.reduce_mean(
         tf.keras.losses.mean_squared_error(y_true, y_pred))
 
 def _build_byol_training_step(online, prediction, target, optimizer,
