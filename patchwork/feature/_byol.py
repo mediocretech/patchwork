@@ -35,9 +35,10 @@ for d in _GENERIC_DESCRIPTIONS:
 def _perceptron(input_dim, num_hidden=4096, output_dim=256, batchnorm=True):
     # macro to build a single-hidden-layer perceptron
     inpt = tf.keras.layers.Input((input_dim,))
-    net = tf.keras.layers.Dense(num_hidden, activation="relu")(inpt)
+    net = tf.keras.layers.Dense(num_hidden)(inpt)
     if batchnorm:
         net = tf.keras.layers.BatchNormalization()(net)
+    net = tf.keras.layers.Activation("relu")(net)
     net = tf.keras.layers.Dense(output_dim)(net)
     return tf.keras.Model(inpt, net)
 
