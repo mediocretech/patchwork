@@ -147,7 +147,7 @@ def _build_byol_training_step(online, prediction, target, optimizer,
         gradients = tape.gradient(lossdict["loss"], trainvars)
         optimizer.apply_gradients(zip(gradients, trainvars))
         # UPDATE WEIGHTS OF TARGET MODEL
-        exponential_model_update(target, online, tau)
+        lossdict["target_online_avg_weight_diff"] = exponential_model_update(target, online, tau)
         
         return lossdict
     return training_step

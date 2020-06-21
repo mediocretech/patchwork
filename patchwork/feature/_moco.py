@@ -32,10 +32,10 @@ def exponential_model_update(slow, fast, alpha=0.999):
     :alpha: exponential smoothing parameter
     """
     rolling_sum = 0
-    for s, f in zip(slow.trainable_variables, fast.trainable_variables):
-        rolling_sum += tf.reduce_sum(tf.square(s-f))
+    for s, f in zip(slow.variables, fast.variables):
+        rolling_sum += tf.reduce_mean(tf.square(s-f))
         s.assign(alpha*s + (1-alpha)*f)
-    return rolling_sum
+    return rolling_sum/len(slow.variables)
 
 
 
