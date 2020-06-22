@@ -61,5 +61,6 @@ def test_build_byol_training_step():
     lossdict = step(x,y)
     
     assert isinstance(lossdict["loss"].numpy(), np.float32)
-    # should include total loss, the MSE component, and the L2 loss
-    assert len(lossdict) == 3
+    # should include total loss, the MSE component, and L2 loss, and model 
+    # update difference
+    assert len(lossdict) == 4
