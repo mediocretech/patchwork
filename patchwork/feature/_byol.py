@@ -208,8 +208,8 @@ class BYOLTrainer(GenericExtractor):
         :testdata: (list) filepaths of a batch of images to use for eval
         :fcn: (keras Model) fully-convolutional network to train as feature extractor
         :augment: (dict) dictionary of augmentation parameters, True for defaults
-        :num_hidden:
-        :output_dim:
+        :num_hidden: number of hidden neurons in the projection and prediction heads
+        :output_dim: output dimension of projection and prediction heads
         :weight_decay: coefficient for L2-norm loss. The original SimCLR paper used 1e-6.
         :lr: (float) initial learning rate
         :lr_decay: (int) steps for learning rate to decay by half (0 to disable)
@@ -226,7 +226,7 @@ class BYOLTrainer(GenericExtractor):
                 config.yml file
         :downstream_labels: dictionary mapping image file paths to labels
         :strategy: if distributing across multiple GPUs, pass a tf.distribute
-            Strategy object here. NOT YET IMPLEMENTED
+            Strategy object here. NOT YET TESTED
         """
         assert augment is not False, "this method needs an augmentation scheme"
         self.logdir = logdir
