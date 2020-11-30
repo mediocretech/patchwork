@@ -110,6 +110,8 @@ def build_optimizer(lr, lr_decay=0, opt_type="adam", decay_type="exponential"):
         return tf.keras.optimizers.Adam(lr)
     elif opt_type == "momentum":
         return tf.keras.optimizers.SGD(lr, momentum=0.9)
+    elif opt_type == "sgd":
+        return tf.keras.optimizers.SGD(lr)
     else:
         assert False, "dont know what to do with {}".format(opt_type)
 
